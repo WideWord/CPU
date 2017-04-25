@@ -1,0 +1,50 @@
+commands
+
+[opcode]
+[result]
+[a]
+[b]
+
+00 [result] = [a]
+01 [result] = [a] + [b]
+02 [result] = [a] - [b]
+03 [result] = [a] & [b]
+04 [result] = [a] | [b]
+05 [result] = [a] ^ [b]
+06 [result] = ~[a]
+
+10 [result] = (u)ba
+11 [result] = (s)ba
+12 [result]_high = ba
+13 [result] += (s)ba
+14 cmp [result] [a]
+15 cmp [result] (u)ba
+16 cmp [result] (s)ba
+
+20 [result] = *([a] + (s)b)  (u byte)
+21 [result] = *([a] + (s)b)  (s byte)
+22 [result] = *([a] + (s)b)  (u 2byte)
+23 [result] = *([a] + (s)b)  (s 2byte)
+24 [result] = *([a] + (s)b)  (u 4byte)
+
+25 *([a] + (s)b) = [result]  (u byte)
+26 *([a] + (s)b) = [result]  (u 2byte)
+27 *([a] + (s)b) = [result]  (u 4byte)
+
+b - conditional mode
+
+30 jmp [result]    
+31 jmp +(s)aresult
+32 jmp domain+(u)aresult
+33 call [result]
+34 call +(s)aresult
+35 call domain+(u)aresult
+36 ret
+
+10 00 01 00   r0 = 1
+10 01 01 00   r1 = 1
+fib:
+01 02 00 01   r2 = r0 + r1
+00 00 01 00   r0 = r1
+00 01 02 00   r1 = r2
+32 08 00 00   jmp fib
