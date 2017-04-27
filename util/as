@@ -6532,8 +6532,17 @@ const proc = require('process');
 
 
 const filename = proc.argv[2];
+
 const code = fs.readFileSync(filename, 'utf8');
 var wstream = fs.createWriteStream(filename + ".bin");
-wstream.write(new Buffer(parser.parse(code)));
+const prog = parser.parse(code);
+if (proc.argv[3] == 'hex') {
+    for (const byte of prog) {
+    wstream.write(byte.toString(16));
+    wstream.write("\n");
+}
+} else {
+    wstream.write(new Buffer(prog));
+}
 wstream.end();
 

@@ -44,7 +44,7 @@ wire[31:0] s_b_op = { b_op[7] ? 24'hFFFFFF : 24'h0, b_op };
 wire[31:0] s_ar_op = { a_op[7] ? 16'hFFFF : 16'h0, a_op, result_op };
 
 wire condition = 	b_op == 0 ? 1 :
-					b_op[4:0] & regs[REG_FLAGS][4:0] == 0 ? 0 : 1;
+					(b_op[4:0] & regs[REG_FLAGS][4:0]) == 0 ? 0 : 1;
 
 always @(posedge clk or posedge reset) if (reset) begin
 	for (int i = 0; i < REG_COUNT; i = i + 1) regs[i] = 0;

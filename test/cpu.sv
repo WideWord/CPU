@@ -41,8 +41,8 @@ end
 
 initial begin
 	for (int i = 0; i < 255; i = i + 1) memory[i] = 0;
-	$readmemh("prog", memory);
-	$monitor($time,, cpu.regs[0],, cpu.command);
+	$readmemh("prog/multiply.bin", memory);
+	$monitor($time,, cpu.regs[0],, cpu.regs[31][4:0] ,, cpu.b_op[4:0],, cpu.condition);
 	reset = 1;
 	clk = 0;
 	#1
