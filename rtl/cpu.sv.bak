@@ -10,17 +10,11 @@ module CPU(
 	input m_out_ready,
 	output reg[31:0] m_out_data,
 	output reg[31:0] m_out_addr,
-	output reg[1:0] m_out_sig_write,
-	
-	output[31:0] debugOutput
+	output reg[1:0] m_out_sig_write
 );
 
 reg[31:0] regs[256];
 reg[31:0] pc;
-reg[31:0] interrupt_handler;
-reg interrupt_enabled;
-
-assign debugOutput = regs[0];
 
 enum reg[2:0] {
 	ST_FETCH_COMMAND,
@@ -34,7 +28,7 @@ reg[31:0] command;
 wire[7:0] opcode = command[7:0];
 wire[7:0] result_op = command[15:8];
 wire[7:0] a_op = command[23:16];
-wire[7:0] b_op = command[31:24];
+wire[7:0] b_op = command[32:24];
 wire[31:0] s_ba_op = { b_op[7] ? 16'hFFFF : 16'h0, b_op, a_op };
 wire[31:0] s_b_op = { b_op[7] ? 24'hFFFFFF : 24'h0, b_op };
 wire[31:0] s_ar_op = { a_op[7] ? 16'hFFFF : 16'h0, a_op, result_op };
@@ -52,8 +46,6 @@ always @(posedge clk or posedge reset) if (reset) begin
 	m_in_addr <= 0;
 	m_out_addr <= 0;
 	m_out_data <= 0;
-	interrupt_handler <= 0;
-	interrupt_enabled <= 0;
 end else begin
 	case (state)
 	ST_FETCH_COMMAND: begin
@@ -308,27 +300,8 @@ end else begin
 			end
  		endcase
 
- 		8'h37: case (state)
- 			ST_EXECUTE: begin
- 				if (condition && interrupt_enabled) begin
- 					regs[254] <= regs[254] + 32'd4;
- 					m_out_addr <= regs[254] + 32'd4;
- 					m_out_sig_write <= 3;
- 					m_out_data <= pc;
- 					state <= ST_EXECUTE_1;
- 					pc <= interrupt_handler;
- 				end
- 			end
- 			ST_EXECUTE_1: begin
- 				m_out_sig_write <= 0;
- 				if (m_out_ready) begin
- 					state <= ST_FETCH_COMMAND;
- 				end
- 			end
- 		endcase
  		
- 		8'h38: interrupt_handler <= regs[result_op];
- 		8'h39: interrupt_enabled <= result_op[0];
+
  		endcase
  	end
 	endcase
