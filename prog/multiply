@@ -1,19 +1,13 @@
-
-
-multiply:
-#sp -= 4;
-[#sp] = #2;
+#0 = 27;
+#1 = 35;
 
 #2 = 0;
-multiply_loop:
+
+loop:
 #2 = #2 + #1;
 #0 -= 1;
 compare #0, 0;
-if not equal jump multiply_loop;
+if not equal jump loop;
 
 #0 = #2;
-
-#2 = [#sp];
-#sp += 4;
-
-ret;
+halt: jump halt;
