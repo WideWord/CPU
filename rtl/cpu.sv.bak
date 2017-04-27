@@ -10,15 +10,11 @@ module CPU(
 	input m_out_ready,
 	output reg[31:0] m_out_data,
 	output reg[31:0] m_out_addr,
-	output reg[1:0] m_out_sig_write,
-	
-	output[31:0] debugOutput
+	output reg[1:0] m_out_sig_write
 );
 
 reg[31:0] regs[256];
 reg[31:0] pc;
-
-assign debugOutput = regs[0];
 
 enum reg[2:0] {
 	ST_FETCH_COMMAND,
@@ -32,7 +28,7 @@ reg[31:0] command;
 wire[7:0] opcode = command[7:0];
 wire[7:0] result_op = command[15:8];
 wire[7:0] a_op = command[23:16];
-wire[7:0] b_op = command[31:24];
+wire[7:0] b_op = command[32:24];
 wire[31:0] s_ba_op = { b_op[7] ? 16'hFFFF : 16'h0, b_op, a_op };
 wire[31:0] s_b_op = { b_op[7] ? 24'hFFFFFF : 24'h0, b_op };
 wire[31:0] s_ar_op = { a_op[7] ? 16'hFFFF : 16'h0, a_op, result_op };
