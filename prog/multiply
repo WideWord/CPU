@@ -1,0 +1,19 @@
+
+
+multiply:
+#sp -= 4;
+[#sp] = #2;
+
+#2 = 0;
+multiply_loop:
+#2 = #2 + #1;
+#0 -= 1;
+compare #0, 0;
+if not equal jump multiply_loop;
+
+#0 = #2;
+
+#2 = [#sp];
+#sp += 4;
+
+ret;
