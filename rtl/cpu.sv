@@ -15,7 +15,11 @@ module CPU(
 	output[31:0] debugOutput
 );
 
-reg[31:0] regs[256];
+parameter REG_COUNT = 32;
+parameter REG_FLAGS = 31;
+parameter REG_SP = 30;
+
+reg[31:0] regs[32];
 reg[31:0] pc;
 reg[31:0] interrupt_handler;
 reg interrupt_enabled;
@@ -40,10 +44,10 @@ wire[31:0] s_b_op = { b_op[7] ? 24'hFFFFFF : 24'h0, b_op };
 wire[31:0] s_ar_op = { a_op[7] ? 16'hFFFF : 16'h0, a_op, result_op };
 
 wire condition = 	b_op == 0 ? 1 :
-					b_op[4:0] & regs[255][4:0] == 0 ? 0 : 1;
+					b_op[4:0] & regs[REG_FLAGS][4:0] == 0 ? 0 : 1;
 
 always @(posedge clk or posedge reset) if (reset) begin
-	for (int i = 0; i < 256; i = i + 1) regs[i] = 0;
+	for (int i = 0; i < REG_COUNT; i = i + 1) regs[i] = 0;
 	pc <= 0;
 	state <= ST_FETCH_COMMAND;
 	command <= 0;
@@ -86,27 +90,27 @@ end else begin
  		8'h13: regs[result_op] <= regs[result_op] + s_ba_op;
 
  		8'h14: begin
- 			regs[255][0] <= regs[result_op] == regs[a_op];
- 			regs[255][1] <= regs[result_op] > regs[a_op];
- 			regs[255][2] <= regs[result_op] < regs[a_op];
- 			regs[255][3] <= $signed(regs[result_op]) > $signed(regs[a_op]);
- 			regs[255][4] <= $signed(regs[result_op]) < $signed(regs[a_op]);
+ 			regs[REG_FLAGS][0] <= regs[result_op] == regs[a_op];
+ 			regs[REG_FLAGS][1] <= regs[result_op] > regs[a_op];
+ 			regs[REG_FLAGS][2] <= regs[result_op] < regs[a_op];
+ 			regs[REG_FLAGS][3] <= $signed(regs[result_op]) > $signed(regs[a_op]);
+ 			regs[REG_FLAGS][4] <= $signed(regs[result_op]) < $signed(regs[a_op]);
  		end
 
  		8'h15: begin
- 			regs[255][0] <= regs[result_op] == { b_op, a_op };
- 			regs[255][1] <= regs[result_op] > { b_op, a_op };
- 			regs[255][2] <= regs[result_op] < { b_op, a_op };
- 			regs[255][3] <= $signed(regs[result_op]) > $signed({ b_op, a_op });
- 			regs[255][4] <= $signed(regs[result_op]) < $signed({ b_op, a_op });
+ 			regs[REG_FLAGS][0] <= regs[result_op] == { b_op, a_op };
+ 			regs[REG_FLAGS][1] <= regs[result_op] > { b_op, a_op };
+ 			regs[REG_FLAGS][2] <= regs[result_op] < { b_op, a_op };
+ 			regs[REG_FLAGS][3] <= $signed(regs[result_op]) > $signed({ b_op, a_op });
+ 			regs[REG_FLAGS][4] <= $signed(regs[result_op]) < $signed({ b_op, a_op });
  		end
 
  		8'h16: begin
- 			regs[255][0] <= regs[result_op] == s_ba_op;
- 			regs[255][1] <= regs[result_op] > s_ba_op;
- 			regs[255][2] <= regs[result_op] < s_ba_op;
- 			regs[255][3] <= $signed(regs[result_op]) > $signed(s_ba_op);
- 			regs[255][4] <= $signed(regs[result_op]) < $signed(s_ba_op);
+ 			regs[REG_FLAGS][0] <= regs[result_op] == s_ba_op;
+ 			regs[REG_FLAGS][1] <= regs[result_op] > s_ba_op;
+ 			regs[REG_FLAGS][2] <= regs[result_op] < s_ba_op;
+ 			regs[REG_FLAGS][3] <= $signed(regs[result_op]) > $signed(s_ba_op);
+ 			regs[REG_FLAGS][4] <= $signed(regs[result_op]) < $signed(s_ba_op);
  		end
 
  		8'h20: case (state)
@@ -236,8 +240,8 @@ end else begin
  		8'h33: case (state)
  			ST_EXECUTE: begin
  				if (condition) begin
- 					regs[254] <= regs[254] + 32'd4;
- 					m_out_addr <= regs[254] + 32'd4;
+ 					regs[REG_SP] <= regs[REG_SP] + 32'd4;
+ 					m_out_addr <= regs[REG_SP] + 32'd4;
  					m_out_sig_write <= 3;
  					m_out_data <= pc;
  					state <= ST_EXECUTE_1;
@@ -255,8 +259,8 @@ end else begin
  		8'h34: case (state)
  			ST_EXECUTE: begin
  				if (condition) begin
- 					regs[254] <= regs[254] + 32'd4;
- 					m_out_addr <= regs[254] + 32'd4;
+ 					regs[REG_SP] <= regs[REG_SP] + 32'd4;
+ 					m_out_addr <= regs[REG_SP] + 32'd4;
  					m_out_sig_write <= 3;
  					m_out_data <= pc;
  					state <= ST_EXECUTE_1;
@@ -274,8 +278,8 @@ end else begin
  		8'h35: case (state)
 			ST_EXECUTE: begin
 				if (condition) begin
-					regs[254] <= regs[254] + 32'd4;
-					m_out_addr <= regs[254] + 32'd4;
+					regs[REG_SP] <= regs[REG_SP] + 32'd4;
+					m_out_addr <= regs[REG_SP] + 32'd4;
 					m_out_sig_write <= 3;
 					m_out_data <= pc;
 					state <= ST_EXECUTE_1;
@@ -293,8 +297,8 @@ end else begin
  		8'h36: case (state)
  			ST_EXECUTE: begin
 				if (condition) begin
-					regs[254] <= regs[254] - 32'd4;
-					m_in_addr <= regs[254];
+					regs[REG_SP] <= regs[REG_SP] - 32'd4;
+					m_in_addr <= regs[REG_SP];
 					m_in_sig_read <= 3;
 					state <= ST_EXECUTE_1;
 				end
@@ -311,8 +315,8 @@ end else begin
  		8'h37: case (state)
  			ST_EXECUTE: begin
  				if (condition && interrupt_enabled) begin
- 					regs[254] <= regs[254] + 32'd4;
- 					m_out_addr <= regs[254] + 32'd4;
+ 					regs[REG_SP] <= regs[REG_SP] + 32'd4;
+ 					m_out_addr <= regs[REG_SP] + 32'd4;
  					m_out_sig_write <= 3;
  					m_out_data <= pc;
  					state <= ST_EXECUTE_1;

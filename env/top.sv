@@ -35,55 +35,44 @@ assign HEX7 = hexDisplay[7];
 HEXDisplay32(debugOutput, hexDisplay);
 
 wire[31:0] debugOutput;
-wire clk = clk_ctr < 2000;
+wire clk = clk_ctr < 4;
 reg[31:0] clk_ctr;
 wire reset = SW[0];
 
-SRAMController sram_controller(
+RAM ram(
 	.clk(clk),
 	.reset(reset),
-	.writeEnabledN(SRAM_WE_N),
-	.outputEnabledN(SRAM_OE_N),
-	.lowByteN(SRAM_LB_N),
-	.highByteN(SRAM_UB_N),
-	.data(SRAM_DQ),
-	.addr(SRAM_ADDR),
-	
-	.m_in_ready(m_in_ready),
-	.m_in_data(m_in_data),
-	.m_in_addr(m_in_addr),
-	.m_in_sig_read(m_in_sig_read),
-	
-	.m_out_addr(m_out_addr),
-	.m_out_sig_write(m_out_sig_write),
-	.m_out_data(m_out_data),
-	.m_out_ready(m_out_ready)
 
+	.read_channels(read_channels),
+	.write_channels(write_channels),
+	.sram(sram_i)
 );
 
-wire[31:0] m_in_addr;
-wire[1:0] m_in_sig_read;
-wire[31:0] m_in_data;
-wire m_in_ready;
+RAMReadChannel read_channels[1](.clk(clk));
+RAMWriteChannel write_channels[1](.clk(clk));
 
-wire[31:0] m_out_addr;
-wire[1:0] m_out_sig_write;
-wire[31:0] m_out_data;
-wire m_out_ready;
+SRAMInterface sram_i(
+	.sig_read_n(SRAM_OE_N),
+	.sig_write_n(SRAM_WE_N),
+	.data(SRAM_DQ),
+	.address(SRAM_ADDR),
+	.high_byte_n(SRAM_UB_N),
+	.low_byte_n(SRAM_LB_N)
+);
 
 CPU cpu(
 	.clk(clk),
 	.reset(reset),
 	
-	.m_in_ready(m_in_ready),
-	.m_in_data(m_in_data),
-	.m_in_addr(m_in_addr),
-	.m_in_sig_read(m_in_sig_read),
+	.m_in_ready(read_channels[0].Client.is_ready),
+	.m_in_data(read_channels[0].Client.data),
+	.m_in_addr(read_channels[0].Client.address),
+	.m_in_sig_read(read_channels[0].Client.sig_read),
 	
-	.m_out_addr(m_out_addr),
-	.m_out_sig_write(m_out_sig_write),
-	.m_out_data(m_out_data),
-	.m_out_ready(m_out_ready),
+	.m_out_addr(write_channels[0].Client.address),
+	.m_out_sig_write(write_channels[0].Client.sig_write),
+	.m_out_data(write_channels[0].Client.data),
+	.m_out_ready(write_channels[0].Client.is_ready),
 	
 	.debugOutput(debugOutput)
 );
@@ -94,7 +83,7 @@ always @(posedge CLOCK_50 or posedge reset) if (reset) begin
 	clk_ctr <= 0;
 end else begin
 	clk_ctr <= clk_ctr + 1;
-	if (clk_ctr > 10000) clk_ctr <= 0;
+	if (clk_ctr > 10) clk_ctr <= 0;
 end
 
 

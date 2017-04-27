@@ -13,7 +13,7 @@ Prog = lines:Line* {
             result[i] = (labels[result[i].inst] >> (result[i].byte * 8)) & 0xFF;
         }
     }
-    return result;
+    return result.map(i => i.toString(16));
 }
 
 Line
@@ -136,8 +136,8 @@ Condition
     
 Register "register"
     = '#' digits:[0-9]+ { return parseInt(digits.join("")); }
-    / ('#sp' / '#SP') { return 254; }
-    / ('#flags' / '#FLAGS') { return 255; }
+    / ('#sp' / '#SP') { return 30; }
+    / ('#flags' / '#FLAGS') { return 31; }
 
 BinaryOp 
     = '+' { return 0x1; }
