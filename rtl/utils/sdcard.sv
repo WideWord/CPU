@@ -19,8 +19,6 @@ module SDController(
 		ST_WAITING
 	} state;
 	
-	reg[]
-
 	always @(posedge clk or posedge reset) begin
 		if (reset) begin
 			state <= ST_BOOT;	
