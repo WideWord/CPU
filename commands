@@ -40,11 +40,6 @@ b - conditional mode
 34 call +(s)aresult
 35 call domain+(u)aresult
 36 ret
-
-10 00 01 00   r0 = 1
-10 01 01 00   r1 = 1
-fib:
-01 02 00 01   r2 = r0 + r1
-00 00 01 00   r0 = r1
-00 01 02 00   r1 = r2
-32 08 00 00   jmp fib
+37 interrupt
+38 set_interrupt_handler [result]
+39 set_interrupt_enabled = result

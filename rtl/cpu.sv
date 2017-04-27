@@ -15,6 +15,8 @@ module CPU(
 
 reg[31:0] regs[256];
 reg[31:0] pc;
+reg[31:0] interrupt_handler;
+reg interrupt_enabled;
 
 enum reg[2:0] {
 	ST_FETCH_COMMAND,
@@ -46,6 +48,8 @@ always @(posedge clk or posedge reset) if (reset) begin
 	m_in_addr <= 0;
 	m_out_addr <= 0;
 	m_out_data <= 0;
+	interrupt_handler <= 0;
+	interrupt_enabled <= 0;
 end else begin
 	case (state)
 	ST_FETCH_COMMAND: begin
@@ -300,8 +304,27 @@ end else begin
 			end
  		endcase
 
+ 		8'h37: case (state)
+ 			ST_EXECUTE: begin
+ 				if (condition && interrupt_enabled) begin
+ 					regs[254] <= regs[254] + 32'd4;
+ 					m_out_addr <= regs[254] + 32'd4;
+ 					m_out_sig_write <= 3;
+ 					m_out_data <= pc;
+ 					state <= ST_EXECUTE_1;
+ 					pc <= interrupt_handler;
+ 				end
+ 			end
+ 			ST_EXECUTE_1: begin
+ 				m_out_sig_write <= 0;
+ 				if (m_out_ready) begin
+ 					state <= ST_FETCH_COMMAND;
+ 				end
+ 			end
+ 		endcase
  		
-
+ 		8'h38: interrupt_handler <= regs[result_op];
+ 		8'h39: interrupt_enabled <= result_op[0];
  		endcase
  	end
 	endcase

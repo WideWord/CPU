@@ -112,7 +112,11 @@ Command
     }
     
     / cond:ConditionPostfix 'ret' { return [0x36, 0, 0, cond]; }
-    
+    / cond:ConditionPostfix 'int' { return [0x37, 0, 0, cond]; }
+    / '#int_handler' ws* '=' ws* r:Register { return [0x38, r, 0, 0]; }
+    / '#int_enabled' ws* '=' ws* c:Constant { return [0x39, c & 0x1, 0, 0]; }
+
+
     / 'nop' { return [0x0, 0x0, 0x0, 0x0]; }
     
     
