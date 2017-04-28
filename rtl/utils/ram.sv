@@ -5,8 +5,8 @@ interface RAMReadChannel(input clk);
 	logic [31:0] data;
 	logic is_ready;
 	
-	modport Client(output address, output sig_read, output data, input is_ready);
-	modport RAM(input address, input sig_read, input data, output is_ready);
+	modport Client(output address, output sig_read, input data, input is_ready);
+	modport RAM(input address, input sig_read, output data, output is_ready);
 	
 endinterface
 
@@ -17,8 +17,8 @@ interface RAMWriteChannel(input clk);
 	logic [31:0] data;
 	logic is_ready;
 	
-	modport Client(output address, output sig_write, input data, input is_ready);
-	modport RAM(input address, input sig_write, output data, output is_ready);
+	modport Client(output address, output sig_write, output data, input is_ready);
+	modport RAM(input address, input sig_write, input data, output is_ready);
 	
 endinterface
 
@@ -44,8 +44,8 @@ module RAM(
 	RAMWriteChannel write_channels[WRITE_CHANNELS_COUNT]
 );
 
-	parameter READ_CHANNELS_COUNT = 1;
-	parameter WRITE_CHANNELS_COUNT = 1;
+	parameter READ_CHANNELS_COUNT = 2;
+	parameter WRITE_CHANNELS_COUNT = 2;
 
 	reg[1:0] sch_sig_read[READ_CHANNELS_COUNT];
 	reg[31:0] sch_read_addr[READ_CHANNELS_COUNT];
