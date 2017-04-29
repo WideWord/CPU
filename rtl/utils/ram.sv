@@ -44,8 +44,8 @@ module RAM(
 	RAMWriteChannel write_channels[WRITE_CHANNELS_COUNT]
 );
 
-	parameter READ_CHANNELS_COUNT = 2;
-	parameter WRITE_CHANNELS_COUNT = 2;
+	parameter READ_CHANNELS_COUNT = 1;
+	parameter WRITE_CHANNELS_COUNT = 1;
 
 	reg[1:0] sch_sig_read[READ_CHANNELS_COUNT];
 	reg[31:0] sch_read_addr[READ_CHANNELS_COUNT];

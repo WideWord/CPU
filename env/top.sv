@@ -21,7 +21,9 @@ module top(
 	
 	output SD_CLK,
 	output SD_CMD,
-	inout[3:0] SD_DAT
+	inout[3:0] SD_DAT,
+	
+	output[8:0] LEDG
 );
 
 
@@ -40,27 +42,28 @@ HEXDisplay32(debugOutput, hexDisplay);
 
 wire[31:0] debugOutput;
 
-reg clk;
-reg clk_250kHz;
-reg clk_250kHz_180;
-reg[31:0] clk_ctr;
-reg[31:0] clk_250kHz_ctr;
-wire reset = SW[0];
-wire cpu_run_stop = SW[1];
+pll pll(
+	.areset(reset),
+	.inclk0(CLOCK_50),
+	.c0(clk)
+);
 
+wire clk;
+wire reset = SW[0];
+/*
 RAM ram(
 	.clk(clk),
 	.reset(reset),
 
 	.read_channels(read_channels),
 	.write_channels(write_channels),
-	.sram(sram_i)
+	.sram(sram)
 );
+*/
+RAMReadChannel read_channels[1](.clk(clk));
+RAMWriteChannel write_channels[1](.clk(clk));
 
-RAMReadChannel read_channels[2](.clk(clk));
-RAMWriteChannel write_channels[2](.clk(clk));
-
-SRAMInterface sram_i(
+SRAMInterface sram(
 	.sig_read_n(SRAM_OE_N),
 	.sig_write_n(SRAM_WE_N),
 	.data(SRAM_DQ),
@@ -73,7 +76,7 @@ assign SRAM_CE_N = 0;
 
 CPU cpu(
 	.clk(clk),
-	.reset(cpu_run_stop),
+	.reset(~boot_ready),
 	
 	.m_in_ready(read_channels[0].Client.is_ready),
 	.m_in_data(read_channels[0].Client.data),
@@ -83,60 +86,33 @@ CPU cpu(
 	.m_out_addr(write_channels[0].Client.address),
 	.m_out_sig_write(write_channels[0].Client.sig_write),
 	.m_out_data(write_channels[0].Client.data),
-	.m_out_ready(write_channels[0].Client.is_ready),
-	
+	.m_out_ready(write_channels[0].Client.is_ready)
 );
 
-SDInterface sd_interface(
+SDInterface sd(
 	.clk(SD_CLK),
 	.cmd(SD_CMD),
 	.cs(SD_DAT[3]),
 	.data(SD_DAT[0])
-	
 );
 
-SDController sd_ctl(
+wire boot_ready;
+
+
+SDBoot sd_boot(
 	.clk(clk),
 	.reset(reset),
 	
-	.ram_read(read_channels[1].Client),
-	.ram_write(write_channels[1].Client),
+	.sd(sd),
+	.sram(sram),
 	
-	.sd(sd_interface.Controller),
-	
-	.sig_250kHz(clk_250kHz),
-	.sig_250kHz_180(clk_250kHz_180),
-	.debugOutput(debugOutput)
-
+	.ready(boot_ready)
 );
 
-always @(posedge CLOCK_50 or posedge reset) if (reset) begin
-	clk_ctr <= 0;
-	clk_250kHz_ctr <= 0;
-end else begin
-	clk_ctr <= clk_ctr + 1;
-	if (clk_ctr > 25) begin
-		clk <= 1;
-	end else begin
-		clk <= 0;
-		clk_250kHz <= 0;
-		clk_250kHz_180 <= 0;
-	end
-	if (clk_ctr > 50) begin 
-		clk_ctr <= 0;
-		clk_250kHz_ctr <= clk_250kHz_ctr + 1;
-		if (clk_250kHz_ctr == 1) begin
-			clk_250kHz <= 1;
-		end
-		if (clk_250kHz_ctr == 3) begin
-			clk_250kHz_ctr <= 0;
-			clk_250kHz_180 <= 1;
-		end
-	end
-	
-	
-	
-end
+assign LEDG[8:1] = 0;
+assign LEDG[0] = boot_ready;
+
+
 
 
 endmodule
