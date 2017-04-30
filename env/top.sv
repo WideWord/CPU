@@ -45,14 +45,16 @@ wire[31:0] debugOutput;
 pll pll(
 	.areset(reset),
 	.inclk0(CLOCK_50),
-	.c0(clk)
+	.c0(clk_250kHz),
+	.c2(clk_50MHz)
 );
 
-wire clk;
+wire clk_250kHz;
+wire clk_50MHz;
 wire reset = SW[0];
 
 RAM ram(
-	.clk(clk),
+	.clk(clk_50MHz),
 	.reset(reset),
 
 	.read_channels(read_channels),
@@ -60,8 +62,8 @@ RAM ram(
 	.sram(sram)
 );
 
-RAMReadChannel read_channels[1](.clk(clk));
-RAMWriteChannel write_channels[2](.clk(clk));
+RAMReadChannel read_channels[1]();
+RAMWriteChannel write_channels[2]();
 
 SRAMInterface sram(
 	.sig_read_n(SRAM_OE_N),
@@ -75,7 +77,7 @@ SRAMInterface sram(
 assign SRAM_CE_N = 0;
 
 CPU cpu(
-	.clk(clk),
+	.clk(clk_50MHz),
 	.reset(~boot_ready),
 	
 	.m_in_ready(read_channels[0].Client.is_ready),
@@ -102,7 +104,7 @@ wire boot_ready;
 
 
 SDBoot sd_boot(
-	.clk(clk),
+	.clk(clk_250kHz),
 	.reset(reset),
 	
 	.sd(sd),

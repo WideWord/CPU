@@ -1,16 +1,17 @@
-interface RAMReadChannel(input clk);
+interface RAMReadChannel();
 
 	logic [31:0] address;
 	logic [1:0] sig_read;
 	logic [31:0] data;
 	logic is_ready;
+	logic clk;
 	
 	modport Client(output address, output sig_read, input data, input is_ready);
 	modport RAM(input address, input sig_read, output data, output is_ready);
 	
 endinterface
 
-interface RAMWriteChannel(input clk);
+interface RAMWriteChannel();
 
 	logic [31:0] address;
 	logic [1:0] sig_write;
@@ -48,10 +49,12 @@ module RAM(
 	parameter WRITE_CHANNELS_COUNT = 2;
 
 	reg[1:0] sch_sig_read[READ_CHANNELS_COUNT];
+	reg[1:0] last_sig_read[READ_CHANNELS_COUNT];
 	reg[31:0] sch_read_addr[READ_CHANNELS_COUNT];
 	reg[31:0] read_data[READ_CHANNELS_COUNT];
 
 	reg[1:0] sch_sig_write[WRITE_CHANNELS_COUNT];
+	reg[1:0] last_sig_write[WRITE_CHANNELS_COUNT];
 	reg[31:0] sch_write_addr[WRITE_CHANNELS_COUNT];
 	reg[31:0] sch_write_data[WRITE_CHANNELS_COUNT];
 	
@@ -117,18 +120,20 @@ module RAM(
 		end else begin
 		
 			for (int i = 0; i < READ_CHANNELS_COUNT; i = i + 1) begin				
-				if (sig_read[i] != 0 && sch_sig_read[i] == 0) begin
+				if (sig_read[i] != 0 && sch_sig_read[i] == 0 && sig_read[i] != last_sig_read[i]) begin
 					sch_sig_read[i] <= sig_read[i];
 					sch_read_addr[i] <= read_address[i];
 				end
+				last_sig_read[i] <= sig_read[i];
 			end
 			
 			for (int i = 0; i < WRITE_CHANNELS_COUNT; i = i + 1) begin	
-				if (sig_write[i] != 0 && sch_sig_write[i] == 0) begin
+				if (sig_write[i] != 0 && sch_sig_write[i] == 0 && sig_write[i] != last_sig_write[i]) begin
 					sch_sig_write[i] <= sig_write[i];
 					sch_write_addr[i] <= write_address[i];
 					sch_write_data[i] <= write_data[i];
 				end
+				last_sig_write[i] <= sig_write[i];
 			end
 		
 			case (state)
