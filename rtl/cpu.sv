@@ -124,7 +124,7 @@ end else begin
  				if (m_in_ready) begin
  					regs[result_op] <= { 24'd0, m_in_data[7:0] };
  					state <= ST_FETCH_COMMAND;
- 				end
+ 				end else state <= ST_EXECUTE_1;
  			end
  		endcase
 
@@ -139,7 +139,7 @@ end else begin
  				if (m_in_ready) begin
  					regs[result_op] <= { m_in_data[7] ? 24'hFFFFFF : 24'h0, m_in_data[7:0] };
  					state <= ST_FETCH_COMMAND;
- 				end
+ 				end else state <= ST_EXECUTE_1;
  			end
  		endcase
 
@@ -154,7 +154,7 @@ end else begin
  				if (m_in_ready) begin
  					regs[result_op] <= { 16'd0, m_in_data[15:0] };
  					state <= ST_FETCH_COMMAND;
- 				end
+ 				end else state <= ST_EXECUTE_1;
  			end
  		endcase
 
@@ -169,7 +169,7 @@ end else begin
  				if (m_in_ready) begin
  					regs[result_op] <= { m_in_data[15] ? 16'hFFFF : 16'h0, m_in_data[15:0] };
  					state <= ST_FETCH_COMMAND;
- 				end
+ 				end else state <= ST_EXECUTE_1;
  			end
  		endcase
  		
@@ -184,7 +184,7 @@ end else begin
  				if (m_in_ready) begin
  					regs[result_op] <= m_in_data;
  					state <= ST_FETCH_COMMAND;
- 				end
+ 				end else state <= ST_EXECUTE_1;
  			end
  		endcase
 
@@ -199,7 +199,7 @@ end else begin
  				m_out_sig_write <= 0;
  				if (m_out_ready) begin
  					state <= ST_FETCH_COMMAND;
- 				end
+ 				end else state <= ST_EXECUTE_1;
  			end
  		endcase
 
@@ -214,7 +214,7 @@ end else begin
  				m_out_sig_write <= 0;
  				if (m_out_ready) begin
  					state <= ST_FETCH_COMMAND;
- 				end
+ 				end else state <= ST_EXECUTE_1;
  			end
  		endcase
 
@@ -229,7 +229,7 @@ end else begin
  				m_out_sig_write <= 0;
  				if (m_out_ready) begin
  					state <= ST_FETCH_COMMAND;
- 				end
+ 				end else state <= ST_EXECUTE_1;
  			end
  		endcase
 
@@ -252,7 +252,7 @@ end else begin
  				m_out_sig_write <= 0;
  				if (m_out_ready) begin
  					state <= ST_FETCH_COMMAND;
- 				end
+ 				end else state <= ST_EXECUTE_1;
  			end
  		endcase
 
@@ -271,7 +271,7 @@ end else begin
  				m_out_sig_write <= 0;
  				if (m_out_ready) begin
  					state <= ST_FETCH_COMMAND;
- 				end
+ 				end else state <= ST_EXECUTE_1;
  			end
  		endcase
 
@@ -290,7 +290,7 @@ end else begin
 				m_out_sig_write <= 0;
 				if (m_out_ready) begin
 					state <= ST_FETCH_COMMAND;
-				end
+				end else state <= ST_EXECUTE_1;
 			end
  		endcase
 
@@ -308,7 +308,7 @@ end else begin
 				if (m_in_ready) begin
 					pc <= m_in_data;
 					state <= ST_FETCH_COMMAND;
-				end
+				end else state <= ST_EXECUTE_1;
 			end
  		endcase
 
@@ -327,7 +327,7 @@ end else begin
  				m_out_sig_write <= 0;
  				if (m_out_ready) begin
  					state <= ST_FETCH_COMMAND;
- 				end
+ 				end else state <= ST_EXECUTE_1;
  			end
  		endcase
  		
