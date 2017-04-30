@@ -50,7 +50,7 @@ pll pll(
 
 wire clk;
 wire reset = SW[0];
-/*
+
 RAM ram(
 	.clk(clk),
 	.reset(reset),
@@ -59,9 +59,9 @@ RAM ram(
 	.write_channels(write_channels),
 	.sram(sram)
 );
-*/
+
 RAMReadChannel read_channels[1](.clk(clk));
-RAMWriteChannel write_channels[1](.clk(clk));
+RAMWriteChannel write_channels[2](.clk(clk));
 
 SRAMInterface sram(
 	.sig_read_n(SRAM_OE_N),
@@ -86,7 +86,9 @@ CPU cpu(
 	.m_out_addr(write_channels[0].Client.address),
 	.m_out_sig_write(write_channels[0].Client.sig_write),
 	.m_out_data(write_channels[0].Client.data),
-	.m_out_ready(write_channels[0].Client.is_ready)
+	.m_out_ready(write_channels[0].Client.is_ready),
+	
+	.debugOutput(debugOutput)
 );
 
 SDInterface sd(
@@ -104,7 +106,7 @@ SDBoot sd_boot(
 	.reset(reset),
 	
 	.sd(sd),
-	.sram(sram),
+	.ram_write(write_channels[1].Client),
 	
 	.ready(boot_ready)
 );

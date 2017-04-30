@@ -45,7 +45,7 @@ module RAM(
 );
 
 	parameter READ_CHANNELS_COUNT = 1;
-	parameter WRITE_CHANNELS_COUNT = 1;
+	parameter WRITE_CHANNELS_COUNT = 2;
 
 	reg[1:0] sch_sig_read[READ_CHANNELS_COUNT];
 	reg[31:0] sch_read_addr[READ_CHANNELS_COUNT];
@@ -68,14 +68,14 @@ module RAM(
 		
 		for (i = 0; i < READ_CHANNELS_COUNT; i = i + 1) begin : read_scheduling
 			assign read_channels[i].data = read_data[i];
-			assign read_channels[i].is_ready = sch_sig_read[i] == 0;
+			assign read_channels[i].is_ready = sch_sig_read[i] == 0 && read_channels[i].sig_read == 0;
 			assign read_address[i] = read_channels[i].address;
 			assign sig_read[i] = read_channels[i].sig_read;
 		end
 		
 		for (i = 0; i < WRITE_CHANNELS_COUNT; i = i + 1) begin : write_scheduling
-			assign write_channels[i].is_ready = sch_sig_write[i] == 0;
-			assign write_address[i] = write_channels[i].sig_write;
+			assign write_channels[i].is_ready = sch_sig_write[i] == 0 && write_channels[i].sig_write == 0;
+			assign write_address[i] = write_channels[i].address;
 			assign sig_write[i] = write_channels[i].sig_write;
 			assign write_data[i] = write_channels[i].data;
 		end
@@ -169,7 +169,7 @@ module RAM(
 						sram.sig_write_n <= 0;
 						sram.sig_read_n <= 1;
 						sram.data <= sch_write_data[current_channel][15:0];
-						sram.address <= sch_read_addr[current_channel][20:1];
+						sram.address <= sch_write_addr[current_channel][20:1];
 						sram.high_byte_n <= !(sch_sig_write[current_channel] > 1);
 						sram.low_byte_n <= 0;
 						if (sch_sig_write[current_channel] == 3) begin
@@ -182,7 +182,7 @@ module RAM(
 						sram.sig_write_n <= 0;
 						sram.sig_read_n <= 1;
 						sram.data <= { sch_write_data[current_channel][7:0], 8'h0 };
-						sram.address <= sch_read_addr[current_channel][20:1];
+						sram.address <= sch_write_addr[current_channel][20:1];
 						sram.high_byte_n <= 0;
 						sram.low_byte_n <= 1;
 						if (sch_sig_write[current_channel] > 13) begin

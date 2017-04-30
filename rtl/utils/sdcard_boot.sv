@@ -2,7 +2,7 @@ module SDBoot(
 	input clk,
 	input reset,
 	
-	SRAMInterface sram, 
+	RAMWriteChannel.Client ram_write,
 	
 	SDInterface sd,
 	
@@ -33,6 +33,7 @@ module SDBoot(
 		BOOT_1,
 		BOOT_2,
 		BOOT_3,
+		BOOT_3_1,
 		BOOT_4,
 		TRANSFER,
 		TRANSFER_0,
@@ -77,12 +78,10 @@ module SDBoot(
 
 	always @(posedge clk or posedge reset) begin
 		if (reset) begin
-			sram.sig_write_n <= 1;
-			sram.sig_read_n <= 1;
-			sram.data <= 'bz;
-			sram.address <= 'd0;
-			sram.high_byte_n <= 'b0;
-			sram.low_byte_n <= 'b0;
+			
+			ram_write.sig_write <= 0;
+			
+			
 			state <= WAIT_80_CLKS;
 			transfer_next_state <= NOTHING;
 			transfer_cmd_next_state <= NOTHING;
@@ -255,7 +254,6 @@ module SDBoot(
 				end
 				
 				BOOT_2: begin
-					sram.sig_write_n <= 1;
 					boot_buf <= spi_data;
 					spi_data <= 'hFF;
 					transfer_next_state <= BOOT_3;
@@ -263,24 +261,29 @@ module SDBoot(
 				end
 				
 				BOOT_3: begin
-					sram.data <= { spi_data, boot_buf };
-					sram.sig_write_n <= 0;
-					sram.address <= boot_ctr;
+					ram_write.data <= { spi_data, boot_buf };
+					ram_write.sig_write <= 2;
+					ram_write.address <= boot_ctr << 1;
 					boot_ctr <= boot_ctr + 1;
-					
-					if (boot_ctr == 255) begin
-						spi_data <= 'hFF;
-						transfer_next_state <= BOOT_4;
-						state <= TRANSFER;
-					end else begin
-						spi_data <= 'hFF;
-						transfer_next_state <= BOOT_2;
-						state <= TRANSFER;
+					state <= BOOT_3_1;
+				end
+				
+				BOOT_3_1: begin
+					ram_write.sig_write <= 0;
+					if (ram_write.is_ready == 1) begin
+						if (boot_ctr == 256) begin
+							spi_data <= 'hFF;
+							transfer_next_state <= BOOT_4;
+							state <= TRANSFER;
+						end else begin
+							spi_data <= 'hFF;
+							transfer_next_state <= BOOT_2;
+							state <= TRANSFER;
+						end
 					end
 				end
 				
 				BOOT_4: begin
-					sram.sig_write_n <= 1;
 					spi_data <= 'hFF;
 					transfer_next_state <= NOTHING;
 					state <= TRANSFER;
