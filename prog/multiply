@@ -1,13 +1,14 @@
-#0 = 27;
-#1 = 35;
 
-#2 = 0;
+#sp = 0x2000;
 
-loop:
-#2 = #2 + #1;
-#0 -= 1;
-compare #0, 0;
-if not equal jump loop;
+call foo;
+#0 += 1;
+jump -4;
 
-#0 = #2;
-halt: jump halt;
+foo:
+call bar;
+ret;
+
+bar:
+#0 = 0xFEEDFEEA;
+ret;

@@ -31,6 +31,16 @@ commands
 26 *([a] + (s)b) = [result]  (u 2byte)
 27 *([a] + (s)b) = [result]  (u 4byte)
 
+28 [result] = *([pc] + s(ba)) (u byte)
+29 [result] = *([pc] + s(ba)) (s byte)
+2A [result] = *([pc] + s(ba)) (u 2byte)
+2B [result] = *([pc] + s(ba)) (s 2byte)
+2C [result] = *([pc] + s(ba)) (u 4byte)
+
+2D *([pc] + s(ba)) = [result] (u byte)
+2E *([pc] + s(ba)) = [result] (u 2byte)
+2F *([pc] + s(ba)) = [result] (u 4byte)
+
 b - conditional mode
 
 30 jmp [result]    

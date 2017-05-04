@@ -340,12 +340,12 @@ parser = /*
         peg$c137 = peg$literalExpectation("#sp", false),
         peg$c138 = "#SP",
         peg$c139 = peg$literalExpectation("#SP", false),
-        peg$c140 = function() { return 254; },
+        peg$c140 = function() { return 30; },
         peg$c141 = "#flags",
         peg$c142 = peg$literalExpectation("#flags", false),
         peg$c143 = "#FLAGS",
         peg$c144 = peg$literalExpectation("#FLAGS", false),
-        peg$c145 = function() { return 255; },
+        peg$c145 = function() { return 31; },
         peg$c146 = function() { return 0x1; },
         peg$c147 = function() { return 0x2; },
         peg$c148 = "&",
@@ -6526,6 +6526,7 @@ parser = /*
     parse:       peg$parse
   };
 })();
+
 
 const fs = require('fs');
 const proc = require('process');
