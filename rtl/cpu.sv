@@ -240,8 +240,8 @@ end else begin
  		8'h33: case (state)
  			ST_EXECUTE: begin
  				if (condition) begin
- 					regs[REG_SP] <= regs[REG_SP] + 32'd4;
- 					m_out_addr <= regs[REG_SP] + 32'd4;
+ 					regs[REG_SP] <= regs[REG_SP] - 32'd4;
+ 					m_out_addr <= regs[REG_SP] - 32'd4;
  					m_out_sig_write <= 3;
  					m_out_data <= pc;
  					state <= ST_EXECUTE_1;
@@ -259,8 +259,8 @@ end else begin
  		8'h34: case (state)
  			ST_EXECUTE: begin
  				if (condition) begin
- 					regs[REG_SP] <= regs[REG_SP] + 32'd4;
- 					m_out_addr <= regs[REG_SP] + 32'd4;
+ 					regs[REG_SP] <= regs[REG_SP] - 32'd4;
+ 					m_out_addr <= regs[REG_SP] - 32'd4;
  					m_out_sig_write <= 3;
  					m_out_data <= pc;
  					state <= ST_EXECUTE_1;
@@ -278,8 +278,8 @@ end else begin
  		8'h35: case (state)
 			ST_EXECUTE: begin
 				if (condition) begin
-					regs[REG_SP] <= regs[REG_SP] + 32'd4;
-					m_out_addr <= regs[REG_SP] + 32'd4;
+					regs[REG_SP] <= regs[REG_SP] - 32'd4;
+					m_out_addr <= regs[REG_SP] - 32'd4;
 					m_out_sig_write <= 3;
 					m_out_data <= pc;
 					state <= ST_EXECUTE_1;
@@ -297,7 +297,7 @@ end else begin
  		8'h36: case (state)
  			ST_EXECUTE: begin
 				if (condition) begin
-					regs[REG_SP] <= regs[REG_SP] - 32'd4;
+					regs[REG_SP] <= regs[REG_SP] + 32'd4;
 					m_in_addr <= regs[REG_SP];
 					m_in_sig_read <= 3;
 					state <= ST_EXECUTE_1;
@@ -315,8 +315,8 @@ end else begin
  		8'h37: case (state)
  			ST_EXECUTE: begin
  				if (condition && interrupt_enabled) begin
- 					regs[REG_SP] <= regs[REG_SP] + 32'd4;
- 					m_out_addr <= regs[REG_SP] + 32'd4;
+ 					regs[REG_SP] <= regs[REG_SP] - 32'd4;
+ 					m_out_addr <= regs[REG_SP] - 32'd4;
  					m_out_sig_write <= 3;
  					m_out_data <= pc;
  					state <= ST_EXECUTE_1;
