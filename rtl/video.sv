@@ -41,14 +41,38 @@ always @(posedge clk or posedge reset) begin
 	end
 end
 
+reg[10:0] countV;
+reg[10:0] countH;
+reg[19:0] screenCtr; 
 
 assign vga_pixel_clk = ~vga_clk;
 assign vga_blank_n = ~((countV < V_BLANK_PIX) || (countH < H_BLANK_PIX));
-
-reg [10:0] countV;
-reg [10:0] countH;
+assign vga_vsync = (countV >= V_FRONT_PORCH-1) && (countV <= V_FRONT_PORCH + V_SYNC_PULSE-1);
+assign vga_vsync = ~((countH >= H_FRONT_PORCH-1) && (countH <= H_FRONT_PORCH + H_SYNC_PULSE-1));
 
 
 always @(posedge vga_clk)
+begin
+    if (countH < H_TOTAL_PIX)
+        countH <= countH + 1'b1;
+    else
+        countH <= 0;
+
+    if ((countV >= V_BLANK_PIX - 1) && (countH >= H_BLANK_PIX - 1)) begin
+    	vga_color <= video_buffer[screenCtr];
+    	screenCtr <= screenCtr + 20'd1;
+	end
+end
+ 
+always @(posedge hsync)
+begin
+    if (countV < V_TOTAL_PIX)
+        countV <= countV + 1'b1;
+    else begin
+    	screenCtr <= 0;
+        countV <= 0;
+    end
+end
+
 
 endmodule

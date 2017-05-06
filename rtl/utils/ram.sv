@@ -42,7 +42,11 @@ module RAM(
 	SRAMInterface sram,
 	
 	RAMReadChannel read_channels[READ_CHANNELS_COUNT],
-	RAMWriteChannel write_channels[WRITE_CHANNELS_COUNT]
+	RAMWriteChannel write_channels[WRITE_CHANNELS_COUNT],
+
+	output[19:0] video_addr,
+	output[23:0] video_color,
+	output video_sig_write
 );
 
 	parameter READ_CHANNELS_COUNT = 1;
@@ -170,32 +174,40 @@ module RAM(
 					state <= ST_READ_1;
 				end
 				ST_WRITE_START: begin
-					if (sch_write_addr[current_channel][0] == 0) begin
-						sram.sig_write_n <= 0;
-						sram.sig_read_n <= 1;
-						sram.data <= sch_write_data[current_channel][15:0];
-						sram.address <= sch_write_addr[current_channel][20:1];
-						sram.high_byte_n <= !(sch_sig_write[current_channel] > 1);
-						sram.low_byte_n <= 0;
-						if (sch_sig_write[current_channel] == 3) begin
-							state <= ST_WRITE_1;
-						end else begin
-							sch_sig_write[current_channel] <= 0;
-							state <= ST_WRITE_END;
-						end
+					if (sch_write_addr[current_channel][31:28] = 4'b1111) begin
+						video_addr <= sch_write_addr[current_channel][19:0];
+						video_color <= sch_write_data[current_channel][23:0];
+						video_sig_write <= 1;
+						sch_sig_write[current_channel] <= 0;
+						state <= ST_WRITE_VIDEO_END;
 					end else begin
-						sram.sig_write_n <= 0;
-						sram.sig_read_n <= 1;
-						sram.data <= { sch_write_data[current_channel][7:0], 8'h0 };
-						sram.address <= sch_write_addr[current_channel][20:1];
-						sram.high_byte_n <= 0;
-						sram.low_byte_n <= 1;
-						if (sch_sig_write[current_channel] > 13) begin
-							state <= ST_WRITE_1;
+						if (sch_write_addr[current_channel][0] == 0) begin
+							sram.sig_write_n <= 0;
+							sram.sig_read_n <= 1;
+							sram.data <= sch_write_data[current_channel][15:0];
+							sram.address <= sch_write_addr[current_channel][20:1];
+							sram.high_byte_n <= !(sch_sig_write[current_channel] > 1);
+							sram.low_byte_n <= 0;
+							if (sch_sig_write[current_channel] == 3) begin
+								state <= ST_WRITE_1;
+							end else begin
+								sch_sig_write[current_channel] <= 0;
+								state <= ST_WRITE_END;
+							end
 						end else begin
-							sch_sig_write[current_channel] <= 0;
-							state <= ST_WRITE_END;
-						end	
+							sram.sig_write_n <= 0;
+							sram.sig_read_n <= 1;
+							sram.data <= { sch_write_data[current_channel][7:0], 8'h0 };
+							sram.address <= sch_write_addr[current_channel][20:1];
+							sram.high_byte_n <= 0;
+							sram.low_byte_n <= 1;
+							if (sch_sig_write[current_channel] > 13) begin
+								state <= ST_WRITE_1;
+							end else begin
+								sch_sig_write[current_channel] <= 0;
+								state <= ST_WRITE_END;
+							end	
+						end
 					end
 				end
 				ST_READ_1: begin
@@ -310,6 +322,10 @@ module RAM(
 					sram.sig_read_n <= 1;
 					sram.high_byte_n <= 1;
 					sram.low_byte_n <= 1;
+					state <= ST_INITIAL;
+				end
+				ST_WRITE_VIDEO_END: begin
+					video_sig_write <= 0;
 					state <= ST_INITIAL;
 				end
 			endcase
