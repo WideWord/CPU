@@ -1,0 +1,41 @@
+#sp = 0x800;
+
+#0 = 6;
+call fac;
+halt: jump halt;
+
+fac:
+	cmp #0, 1;
+	if equal ret;
+
+	#sp -= 4;
+	[#sp] = #1;
+
+	#1 = #0;
+	#0 -= 1;
+	call fac;
+	call mul;
+
+	#1 = [#sp];
+	#sp += 4;
+	ret;
+
+mul:
+	cmp #0, 0;
+	if equal ret;
+
+	#sp -= 4;
+	[#sp] = #2;
+
+	#2 = 0;
+
+.loop:
+	#2 = #2 + #1;
+	#0 -= 1;
+	cmp #0, 0;
+	if not equal jump .loop;
+
+	#0 = #2;
+	#2 = [#sp];
+	#sp += 4;
+	ret;
