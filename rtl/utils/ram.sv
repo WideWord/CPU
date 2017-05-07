@@ -44,8 +44,8 @@ module RAM(
 	RAMReadChannel read_channels[READ_CHANNELS_COUNT],
 	RAMWriteChannel write_channels[WRITE_CHANNELS_COUNT],
 
-	output[19:0] video_addr,
-	output[23:0] video_color,
+	output[12:0] video_addr,
+	output[15:0] video_color,
 	output video_sig_write
 );
 
@@ -100,7 +100,10 @@ module RAM(
 		ST_READ_3,
 		ST_WRITE_1,
 		ST_WRITE_2,
-		ST_WRITE_END
+		ST_WRITE_END,
+		ST_WRITE_VIDEO_END,
+		ST_WRITE_VIDEO_END_2,
+		ST_WRITE_VIDEO_END_3
 	} state;
 
 	always @(posedge clk or posedge reset) begin
@@ -174,12 +177,12 @@ module RAM(
 					state <= ST_READ_1;
 				end
 				ST_WRITE_START: begin
-					if (sch_write_addr[current_channel][31:28] = 4'b1111) begin
-						video_addr <= sch_write_addr[current_channel][19:0];
-						video_color <= sch_write_data[current_channel][23:0];
+					if (sch_write_addr[current_channel][31:28] == 4'b1111) begin
+						video_addr <= sch_write_addr[current_channel][12:0];
+						video_color <= sch_write_data[current_channel][15:0];
 						video_sig_write <= 1;
 						sch_sig_write[current_channel] <= 0;
-						state <= ST_WRITE_VIDEO_END;
+						state <= ST_WRITE_VIDEO_END_3;
 					end else begin
 						if (sch_write_addr[current_channel][0] == 0) begin
 							sram.sig_write_n <= 0;
@@ -324,7 +327,11 @@ module RAM(
 					sram.low_byte_n <= 1;
 					state <= ST_INITIAL;
 				end
-				ST_WRITE_VIDEO_END: begin
+				ST_WRITE_VIDEO_END: state <= ST_WRITE_VIDEO_END_2;
+				ST_WRITE_VIDEO_END_2: begin
+					state <= ST_WRITE_VIDEO_END_3;
+				end
+				ST_WRITE_VIDEO_END_3: begin
 					video_sig_write <= 0;
 					state <= ST_INITIAL;
 				end

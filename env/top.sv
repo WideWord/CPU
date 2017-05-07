@@ -23,7 +23,16 @@ module top(
 	output SD_CMD,
 	inout[3:0] SD_DAT,
 	
-	output[8:0] LEDG
+	output[8:0] LEDG,
+	
+	output VGA_CLK,
+	output VGA_BLANK_N,
+	output[7:0] VGA_R,
+	output[7:0] VGA_G,
+	output[7:0] VGA_B,
+	output VGA_SYNC_N,
+	output VGA_HS,
+	output VGA_VS
 );
 
 
@@ -46,11 +55,14 @@ pll pll(
 	.areset(reset),
 	.inclk0(CLOCK_50),
 	.c0(clk_250kHz),
+	.c1(clk_40MHz),
 	.c2(clk_50MHz)
 );
 
+
 wire clk_250kHz;
 wire clk_50MHz;
+wire clk_40MHz;
 wire reset = SW[0];
 
 RAM ram(
@@ -59,7 +71,11 @@ RAM ram(
 
 	.read_channels(read_channels),
 	.write_channels(write_channels),
-	.sram(sram)
+	.sram(sram),
+	
+	.video_color(video_color),
+	.video_addr(video_addr),
+	.video_sig_write(video_sig_write)
 );
 
 RAMReadChannel read_channels[1]();
@@ -117,6 +133,26 @@ assign LEDG[8:1] = 0;
 assign LEDG[0] = boot_ready;
 
 
+wire[12:0] video_addr;
+wire[15:0] video_color;
+wire video_sig_write;
 
+assign VGA_SYNC_N = 0;
+
+VideoCtl video_ctl(
+	.clk(clk_50MHz), 
+	.reset(reset),
+	.sig_write(video_sig_write),
+	.addr(video_addr),
+	.value(video_color),
+	.vga_double_clk(clk_40MHz),
+	.vga_pixel_clk(VGA_CLK),
+	.vga_r(VGA_R),
+	.vga_g(VGA_G),
+	.vga_b(VGA_B),
+	.vga_blank_n(VGA_BLANK_N),
+	.vga_hsync(VGA_HS),
+	.vga_vsync(VGA_VS)
+);
 
 endmodule

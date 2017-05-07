@@ -1107,6 +1107,10 @@ set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
 set_global_assignment -name VERILOG_SHOW_LMF_MAPPING_MESSAGES OFF
+set_global_assignment -name ENABLE_SIGNALTAP OFF
+set_global_assignment -name USE_SIGNALTAP_FILE cpu.stp
+set_global_assignment -name VERILOG_FILE ../env/video_ram2.v
+set_global_assignment -name VERILOG_FILE ../env/video_ram.v
 set_global_assignment -name VERILOG_FILE pll.v
 set_global_assignment -name SYSTEMVERILOG_FILE ../rtl/utils/sseg.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ../rtl/cpu.sv
@@ -1119,8 +1123,6 @@ set_global_assignment -name CDF_FILE "C:/Users/Ee?eee/Desktop/DE@/DE2_115_tools/
 set_global_assignment -name SYSTEMVERILOG_FILE ../rtl/utils/spi.sv
 set_global_assignment -name QIP_FILE pll.qip
 set_global_assignment -name SYSTEMVERILOG_FILE ../rtl/utils/sdcard_boot.sv
-set_global_assignment -name ENABLE_SIGNALTAP OFF
-set_global_assignment -name USE_SIGNALTAP_FILE cpu.stp
 set_global_assignment -name SIGNALTAP_FILE ../rtl/utils/stp2.stp
 set_global_assignment -name SIGNALTAP_FILE ../rtl/utils/stp3.stp
 set_global_assignment -name SIGNALTAP_FILE sdboot.stp
@@ -1129,6 +1131,13 @@ set_global_assignment -name CDF_FILE output_files/cpu_pof.cdf
 set_global_assignment -name SIGNALTAP_FILE cpu.stp
 set_global_assignment -name CDF_FILE output_files/cpu.cdf
 set_global_assignment -name SDC_FILE cpu.sdc
-set_global_assignment -name SLD_FILE "D:/Dev/cpu/de2/cpu_auto_stripped.stp"
 set_global_assignment -name SYSTEMVERILOG_FILE ../rtl/video.sv
+set_global_assignment -name SIGNALTAP_FILE vga.stp
+set_global_assignment -name QIP_FILE ../env/video_ram.qip
+set_global_assignment -name SIGNALTAP_FILE vga_ram.stp
+set_global_assignment -name QIP_FILE ../env/video_ram2.qip
+set_global_assignment -name QIP_FILE pll2.qip
+set_global_assignment -name QIP_FILE ../env/vram_st.qip
+set_global_assignment -name QIP_FILE ../env/vram_s.qip
+set_global_assignment -name SLD_FILE "D:/Dev/cpu/de2/cpu_auto_stripped.stp"
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
