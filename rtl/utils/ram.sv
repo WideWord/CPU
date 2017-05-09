@@ -45,7 +45,7 @@ module RAM(
 	RAMWriteChannel write_channels[WRITE_CHANNELS_COUNT],
 
 	output[12:0] video_addr,
-	output[15:0] video_color,
+	output[31:0] video_color,
 	output video_sig_write
 );
 
@@ -179,7 +179,7 @@ module RAM(
 				ST_WRITE_START: begin
 					if (sch_write_addr[current_channel][31:28] == 4'b1111) begin
 						video_addr <= sch_write_addr[current_channel][12:0];
-						video_color <= sch_write_data[current_channel][15:0];
+						video_color <= sch_write_data[current_channel];
 						video_sig_write <= 1;
 						sch_sig_write[current_channel] <= 0;
 						state <= ST_WRITE_VIDEO_END_3;

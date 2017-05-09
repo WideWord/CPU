@@ -3,9 +3,9 @@ module VideoCtl(
 	input reset,
 	input sig_write,
 	input[12:0] addr,
-	input[15:0] value,
+	input[31:0] value,
 
-	input vga_double_clk,
+	input vga_clk,
 	output[7:0] vga_r,
 	output[7:0] vga_g,
 	output[7:0] vga_b,
@@ -48,7 +48,7 @@ assign vga_r = vga_blank_n ? vga_color[7:0] : 8'd0;
 assign vga_g = vga_blank_n ? vga_color[15:8] : 8'd0;
 assign vga_b = vga_blank_n ? vga_color[23:16] : 8'd0;
 
-assign vga_pixel_clk = ~vga_double_clk;
+assign vga_pixel_clk = ~vga_clk;
 
 reg st_wren;
 reg[31:0] st_data;
@@ -63,7 +63,7 @@ vram_st vram_st(
 	.data(st_data),
 	.wraddress(st_wr_addr),
 	
-	.rdclock(vga_double_clk),
+	.rdclock(vga_clk),
 	.q(st_q),
 	.rdaddress(st_rd_addr)
 );
@@ -81,28 +81,40 @@ vram_s vram_s(
 	.data(s_data),
 	.wraddress(s_wr_addr),
 	
-	.rdclock(vga_double_clk),
+	.rdclock(vga_clk),
 	.q(s_q),
 	.rdaddress(s_rd_addr)
 );
 
+reg sig_write_buf;
+reg[12:0] addr_buf;
+reg[31:0] value_buf;
 
 always @(posedge clk or posedge reset) begin
 	if (reset) begin
 		st_wren <= 0;
 		s_wren <= 0;
+		
+		sig_write_buf <= 0;
+		addr_buf <= 0;
+		value_buf <= 0;
 	end else begin
+	
+		sig_write_buf <= sig_write;
+		addr_buf <= addr;
+		value_buf <= value;
+	
 		st_wren <= 0;
 		s_wren <= 0;
 	
-		if (sig_write) begin
-			if (addr < 1024) begin
-				st_wr_addr <= addr;
-				st_data <= value;
+		if (sig_write_buf) begin
+			if (addr_buf < 1024) begin
+				st_wr_addr <= addr_buf;
+				st_data <= value_buf;
 				st_wren <= 1;
 			end else begin
-				s_wr_addr <= addr - 1024;
-				s_data <= value;
+				s_wr_addr <= addr_buf - 1024;
+				s_data <= value_buf;
 				s_wren <= 1;
 			end
 		end
@@ -115,7 +127,7 @@ reg vsync_buf[2];
 reg[3:0] charX_buf[2];
 reg[3:0] charY_buf[2];
 
-always @(posedge vga_double_clk or posedge reset) begin
+always @(posedge vga_clk or posedge reset) begin
 
 	if (reset) begin
 		countV <= 0;
@@ -127,7 +139,7 @@ always @(posedge vga_double_clk or posedge reset) begin
 		screenSym <= 0;
 	end else begin
 	
-		if (countH >= H_BLANK_PIX - 1) begin
+		if (countH >= H_BLANK_PIX) begin
 			if (charX < 7) begin
 				charX <= charX + 1;
 			end else begin
@@ -144,7 +156,7 @@ always @(posedge vga_double_clk or posedge reset) begin
 			charX <= 0;
 			screenX <= 0;
 
-			if (countV >= V_BLANK_PIX - 1) begin
+			if (countV >= V_BLANK_PIX) begin
 				if (charY < 11) begin
 					charY <= charY + 1;
 					screenSym <= screenSymRowStart;
@@ -190,6 +202,8 @@ always @(posedge vga_double_clk or posedge reset) begin
 		blank_n_buf[1] <= blank_n_buf[0];
 		vsync_buf[1] <= vsync_buf[0];
 		hsync_buf[1] <= hsync_buf[0];
+		
+		/////////
 		
 		vga_color <= st_q[{charY_buf[1][1:0], charX_buf[1][2:0]}] ? 24'hFFFFFF : 24'h0;
 		

@@ -134,7 +134,7 @@ assign LEDG[0] = boot_ready;
 
 
 wire[12:0] video_addr;
-wire[15:0] video_color;
+wire[31:0] video_color;
 wire video_sig_write;
 
 assign VGA_SYNC_N = 0;
@@ -145,7 +145,7 @@ VideoCtl video_ctl(
 	.sig_write(video_sig_write),
 	.addr(video_addr),
 	.value(video_color),
-	.vga_double_clk(clk_40MHz),
+	.vga_clk(clk_40MHz),
 	.vga_pixel_clk(VGA_CLK),
 	.vga_r(VGA_R),
 	.vga_g(VGA_G),
